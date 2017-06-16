@@ -41,7 +41,7 @@ class NYCParkingService:
         self.session.headers.update({"PMAuthenticationToken": data['token']})
 
     def __get_identity(self):
-        """Gets the service identity information"""
+        """Gets the service identity information."""
         response = self.session.get(urljoin(API_BASE_URL, "account/identify2"))
         return response.json()
 
@@ -52,7 +52,8 @@ class NYCParkingService:
         if response.status_code == 404:
             raise NoDataFoundError("No historical parking sessions found")
 
-        yield response.json()
+        for session in response.json()['actions']:
+            yield session
 
     def active_sessions(self):
         """Generates active parking session data."""
@@ -61,4 +62,5 @@ class NYCParkingService:
         if response.status_code == 404:
             raise NoDataFoundError("No active parking sessions found")
 
-        yield response.json()
+        for session in response.json()['actions']:
+            yield session
