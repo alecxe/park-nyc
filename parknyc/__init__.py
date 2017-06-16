@@ -1,4 +1,4 @@
-from service import NYCParkingService  # noqa
+from .service import NYCParkingService  # noqa
 
 
 __version__ = '0.0.1'
