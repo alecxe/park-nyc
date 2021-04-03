@@ -1,8 +1,9 @@
 from base64 import b64encode
 from datetime import datetime, timedelta
 import uuid
+import time
 
-from parknyc.exceptions import *  # noqa
+from nycpark.exceptions import *  # noqa
 
 try:
     from urllib.parse import urljoin
@@ -67,12 +68,12 @@ class NYCParkingService:
         for session in response.json()['actions']:
             yield session
 
-    def start_session(self, zone, duration):
+    def start_session(self, zone, duration, vehicle_idx=0):
         """
         Starts parking at the given zone for a given amount of time.
-
         :param zone: zone number as an integer or a string
         :param duration: parking duration as an int - number of minutes
+        :param vehicle_idx: vehicle to park as an index of the vehicle array (integer)
         """
         response = self.session.get(urljoin(API_BASE_URL, "parking/zones/{zone}".format(zone=zone)))
 
@@ -90,16 +91,17 @@ class NYCParkingService:
             raise InvalidParkingSessionDuration(
                 "Duration {duration} is not valid. Available options are: {available_durations}".format(duration=duration,
                                                                                                         available_durations=", ".join(available_durations)))
+        vehicle_data = self.get_vehicles['vehicles'][vehicle_idx]
 
-        # get the first vehicle TODO: it should be given as an input as well
-        response = self.session.get(urljoin(API_BASE_URL, "account/vehicles"))
+        self.__park(zone_data, vehicle_data, duration)
 
+    def get_vehicles(self):
+        # TODO: Add pagination in case there are more than 150 vehicles
+        response = self.session.get(urljoin(API_BASE_URL, "account/vehicles?page=1&pageSize=150&noCache={ts}".format(ts=int(time.time()))))
         if response.status_code == 404:
             raise NoDataFoundError("No configured vehicles found in the account")
 
-        vehicle_data = response.json()['vehicles'][0]
-
-        self.__park(zone_data, vehicle_data, duration)
+        return response.json()
 
     def __park(self, zone_data, vehicle_data, duration):
         """
