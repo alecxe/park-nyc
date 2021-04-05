@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import uuid
 import time
 
-from nycpark.exceptions import *  # noqa
+from parknyc.exceptions import *  # noqa
 
 try:
     from urllib.parse import urljoin
