@@ -91,7 +91,7 @@ class NYCParkingService:
             raise InvalidParkingSessionDuration(
                 "Duration {duration} is not valid. Available options are: {available_durations}".format(duration=duration,
                                                                                                         available_durations=", ".join(available_durations)))
-        vehicle_data = self.get_vehicles['vehicles'][vehicle_idx]
+        vehicle_data = self.get_vehicles()['vehicles'][vehicle_idx]
 
         self.__park(zone_data, vehicle_data, duration)
 
